@@ -1,7 +1,7 @@
 # R script to create ensemble forecats using models submitted to the CovidHub
 
 ref_date <- lubridate::ceiling_date(Sys.Date(), "week") - lubridate::days(1)
-hub_path <- "../.."
+hub_path <- "."
 task_id_cols <- c(
   "reference_date", "location", "horizon",
   "target", "target_end_date"
