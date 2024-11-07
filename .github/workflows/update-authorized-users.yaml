@@ -36,7 +36,7 @@ jobs:
         message: "Update authorized users"
         default_author: github_actions
         push: true
-        new_branch: add-auth-users
+        new_branch: update-authorized-users
   
     - name: Create pull request
       id: create_pr
