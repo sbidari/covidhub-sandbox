@@ -36,8 +36,6 @@ jobs:
       - name: Get all changed files
         id: get_all_changed_files
         uses: tj-actions/changed-files@v45
-        with:
-          path: '**'
 
       - name: Check for changes outside model-output folder
         id: check_changes_outside_model_output
