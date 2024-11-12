@@ -38,7 +38,14 @@ jobs:
         uses: tj-actions/changed-files@v45
         with:
           path: 'model-metadata'
- 
+
+      - name: Get Token
+        id: get_workflow_token
+        uses: peter-murray/workflow-application-token-action@v4
+        with:
+          application_id: ${{ vars.GH_APP_ID }}
+          application_private_key: ${{ secrets.GH_APP_KEY }}
+
       - name: Approve PR if changes made by authorized user
         if: steps.get_changed_metadata_files.outputs.any_changed != 'true'
         run: |
@@ -72,10 +79,10 @@ jobs:
             
           done
         env:
-          GH_TOKEN: ${{secrets.GH_PAT_TOKEN}}
+          GH_TOKEN: ${{ steps.get_workflow_token.outputs.token }}
 
       - name: Enable auto-merge for approved PRs
         if: steps.get_changed_metadata_files.outputs.any_changed != 'true'
         run: gh pr merge --auto --squash "${{ github.event.pull_request.html_url }}"
         env:
-          GH_TOKEN: ${{secrets.GH_PAT_TOKEN}}
+          GH_TOKEN: ${{ steps.get_workflow_token.outputs.token }}
