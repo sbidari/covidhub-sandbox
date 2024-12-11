@@ -4,5 +4,5 @@ teamfive-model5 dylanhmorris
 teamfour-testmodel sbidari
 teamone-modelone githubbot, sbidari
 teamsix-modelsix sbidari
-teamthree-testmodel NA
+teamthree-testmodel sbidari
 teamtwo-modeltwo janedoe
