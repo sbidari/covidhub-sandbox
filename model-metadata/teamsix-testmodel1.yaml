@@ -8,17 +8,11 @@ model_contributors: [
     "name": "Jane Doe",
     "affiliation": "University of Example",
     "email": "jdoe@example.com"
-  },
-
-  {
-    "name": "Alice Bob",
-    "affiliation": "Example LLC",
-    "email": "alicebob@example.com"
   }
 ]
 
 license: "CC-BY-4.0"
-designated_model: true
+designated_model: false
 designated_github_user: "sbidari"
 methods: "Example model to test submission"
 data_inputs: "Daily incident covid hospitalizations"

@@ -8,13 +8,11 @@ on:
     branches: 
       - main
     paths:
-      - 'model-metadata/*'
-      - 'model-output/*'
-      - '!**'
+      - 'model-metadata/*.yaml'
     
 jobs:
   update-users-list:
-    if: ${{ github.event.pull_request.merged == 'true' && contains(github.event.pull_request.labels.*.name, 'model-metadata') }}
+    if: ${{ github.repository_owner == 'CDCgov' &&  github.event.pull_request.merged == true }}
     runs-on: ubuntu-22.04
     env:
       GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
