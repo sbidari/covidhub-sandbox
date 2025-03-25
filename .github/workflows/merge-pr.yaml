@@ -61,7 +61,7 @@ jobs:
       
       - name: approve PR 
         run: |  
-          STATUS=$(cat "$artifact_dir/status" | tr -d '[:space:]')
+          STATUS=$(cat "artifacts_dir/status" | tr -d '[:space:]')
           if [ "$STATUS" != "success" ]; then
             echo "Validation status mismatch: $STATUS"
             exit 1
