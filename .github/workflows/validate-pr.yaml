@@ -85,7 +85,7 @@ jobs:
           done # end loop over models
 
           if [[ "$is_authorized" == true ]]; then
-            echo "success" >> validation_status.txt
+            echo "success" > status
             exit 0
           fi
 
@@ -93,4 +93,4 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: validation_status
-          path: validation_status.txt
+          path: status

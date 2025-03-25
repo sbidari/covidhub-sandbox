@@ -35,6 +35,7 @@ jobs:
         uses: actions/download-artifact@v4
         with: 
           name: validation_status
+          path: .
           github-token: ${{ secrets.GITHUB_TOKEN }} 
           repository: ${{ github.repository }}
           run-id: ${{ github.event.workflow_run.id }}
@@ -51,7 +52,7 @@ jobs:
       
       - name: approve PR 
         run: |  
-          STATUS=$(cat validation_status.txt | tr -d '[:space:]')  
+          STATUS=$(cat "validation_status/status")  
 
           if [ "$STATUS" != "success" ]; then
             echo "Validation status mismatch: $STATUS"
