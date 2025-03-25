@@ -46,6 +46,9 @@ jobs:
           application_id: ${{ vars.GH_APP_ID }}
           application_private_key: ${{ secrets.GH_APP_KEY }}
 
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
       - name: approve PR 
         run: |  
           STATUS=$(cat validation_status.txt | tr -d '[:space:]')  
