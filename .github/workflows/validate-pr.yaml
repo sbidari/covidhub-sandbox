@@ -1,4 +1,4 @@
-name: Merge valid PRs
+name: Validate PRs
 
 on:
   workflow_dispatch:
@@ -6,20 +6,21 @@ on:
     branches: main
     paths:
       - 'model-output/**'
-      - '!**README**'
-      
+      - '!model-output/README.md'
+      - '!model-output/CovidHub-ensemble/**'
+      - '!model-output/CovidHub-baseline/**'
+
 jobs:
-  validate-user-and-merge:
+  validate-and-save-status:
     runs-on: ubuntu-22.04
     permissions: 
-      contents: write
-      pull-requests: write
+      contents: read
+      pull-requests: read
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
         with:
           repository: ${{ github.event.pull_request.head.repo.full_name }}
-          fetch-depth: 0
         
       - name: Read authorized user
         id: read_authorized_user
@@ -28,16 +29,16 @@ jobs:
           branch: main
           path: 'src/code/authorized_users.txt'
 
-      - name: Get changed files in model-ouput
+      - name: Get model output changes
         id: get_changed_files_in_model_output
-        uses: tj-actions/changed-files@v45
+        uses: step-security/changed-files@v45
         with:
-          path: 'model-output'
-          dir_names: 'True'
+          path: model-output
+          dir_names: "true"
 
-      - name: Get all changed files
+      - name: Get all changes
         id: get_all_changed_files
-        uses: tj-actions/changed-files@v45
+        uses: step-security/changed-files@v45
 
       - name: Check for changes outside model-output folder
         id: check_changes_outside_model_output
@@ -52,16 +53,10 @@ jobs:
             fi
           done
 
-      - name: Get Token
-        id: get_workflow_token
-        uses: peter-murray/workflow-application-token-action@v4
-        with:
-          application_id: ${{ vars.GH_APP_ID }}
-          application_private_key: ${{ secrets.GH_APP_KEY }}
-
-      - name: Approve PR if changes made by authorized user
+      - name: check and save approval status
         run: |
           readarray -t lines_arr <<< "${{ steps.read_authorized_user.outputs.content }}"
+          is_authorized=false
           
           for line in "${lines_arr[@]}"; do
             read -r dir user_list <<< $line
@@ -70,35 +65,32 @@ jobs:
             for file in ${{ steps.get_changed_files_in_model_output.outputs.all_modified_files }}; do
               if [[ "$file" == "$dir" ]]; then
                 is_authorized=false
-                
                 if [[ "$user_array" == "NA" ]]; then
-                  echo "No authorized users found. Will not attempt auto-approval."
+                  echo "Changes found within `$dir/`, but no authorized users found for '$dir/'. Will not attempt auto-approval of changes. Consider adding one or more authorized users to allow auto-approval in the future."
                   exit 0
-                fi                
-
+                fi                  
                 for user in "${user_array[@]}"; do
                   if [[ "${{ github.actor }}" == "$user" ]]; then
                     is_authorized=true
                     break
                   fi
                 done
-
-                if [[ "$is_authorized" == true ]]; then
-                  gh pr review --approve "${{ github.event.pull_request.html_url }}"
-                  exit 0
-                else
+                if [[ "$is_authorized" != true ]]; then
                   echo "Error: Only following users are allowed to change files in '$dir/': ${user_array[*]}"
                   exit 1
-                fi
-
-              fi
-            done
+                fi 
+              fi # end if "$file" == "$dir"
+            done # end loop over files
             
-          done
-        env:
-          GH_TOKEN: ${{ steps.get_workflow_token.outputs.token }}
+          done # end loop over models
 
-      - name: Enable auto-merge for approved PRs
-        run: gh pr merge --auto --squash "${{ github.event.pull_request.html_url }}"
-        env:
-          GH_TOKEN: ${{ steps.get_workflow_token.outputs.token }}
+          if [[ "$is_authorized" == true ]]; then
+            echo "success" >> validation_status.txt
+            exit 0
+          fi
+
+      - name: upload validation status
+        uses: actions/upload-artifact@v4
+        with:
+          name: validation_status
+          path: validation_status.txt
