@@ -58,12 +58,10 @@ jobs:
           find . -name "status" -o -name "validation_status"
           echo "Artifact content:"
           cat validation_status/status || cat status || echo "File missing"
-
       
       - name: approve PR 
         run: |  
-          STATUS=$(cat "artifacts_dir/validation_status/status")  
-
+          STATUS=$(cat "$artifact_dir/status" | tr -d '[:space:]')
           if [ "$STATUS" != "success" ]; then
             echo "Validation status mismatch: $STATUS"
             exit 1
