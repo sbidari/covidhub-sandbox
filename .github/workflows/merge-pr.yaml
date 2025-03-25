@@ -49,6 +49,16 @@ jobs:
 
       - name: Checkout code
         uses: actions/checkout@v4
+
+      - name: Debug artifact structure
+        run: |
+          echo "Current directory:"
+          pwd
+          echo "Files found:"
+          find . -name "status" -o -name "validation_status"
+          echo "Artifact content:"
+          cat validation_status/status || cat status || echo "File missing"
+
       
       - name: approve PR 
         run: |  
