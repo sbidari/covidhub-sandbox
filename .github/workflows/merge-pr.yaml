@@ -31,11 +31,14 @@ jobs:
           echo "PR_NUMBER=${PR_NUMBER}" >> $GITHUB_ENV
           echo "PR number from workflow_run event: ${PR_NUMBER}"
 
+      - name: Checkout code
+        uses: actions/checkout@v4
+
       - name: Download validation artifact
         uses: actions/download-artifact@v4
         with: 
           name: validation_status
-          path: .
+          path: artifacts_dir
           github-token: ${{ secrets.GITHUB_TOKEN }} 
           repository: ${{ github.repository }}
           run-id: ${{ github.event.workflow_run.id }}
@@ -46,9 +49,6 @@ jobs:
         with:
           application_id: ${{ vars.GH_APP_ID }}
           application_private_key: ${{ secrets.GH_APP_KEY }}
-
-      - name: Checkout code
-        uses: actions/checkout@v4
 
       - name: Debug artifact structure
         run: |
@@ -62,7 +62,7 @@ jobs:
       
       - name: approve PR 
         run: |  
-          STATUS=$(cat "validation_status/status")  
+          STATUS=$(cat "artifacts_dir/validation_status/status")  
 
           if [ "$STATUS" != "success" ]; then
             echo "Validation status mismatch: $STATUS"
