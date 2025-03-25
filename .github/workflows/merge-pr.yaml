@@ -13,30 +13,23 @@ jobs:
     permissions: 
       contents: write
       pull-requests: write
-    steps:
-      # - name: Get PR info
-      #   run: |
-      #     PR_INFO=$(gh api \
-      #       -H "Accept: application/vnd.github.v3+json" \
-      #       "/repos/${{ github.repository }}/pulls" \
-      #       --jq '.[] | select(.head.sha=="${{ github.event.workflow_run.head_sha }}")')
-
-      #     if [ -z "$PR_INFO" ]; then
-      #       echo "PR not found"
-      #       exit 1
-      #     fi
-          
-      #     PR_NUMBER=$(jq -r .number <<< "$PR_INFO")
-      #     echo "PR_NUMBER=$PR_NUMBER" >> $GITHUB_ENV
-
-      - name: Debug event
-        run: echo "${{ toJSON(github.event) }}"
-  
+    steps:  
       - name: Set PR Number
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PR_TARGET_REPO: ${{ github.repository }}
+          PR_BRANCH: |-
+            ${{
+              (github.event.workflow_run.head_repository.owner.login != github.event.workflow_run.repository.owner.login)
+                && format('{0}:{1}', github.event.workflow_run.head_repository.owner.login, github.event.workflow_run.head_branch)
+                || github.event.workflow_run.head_branch
+            }}
         run: |
-          PR_NUMBER=${{ github.event.workflow_run.pull_requests.number }}
-          echo "PR_NUMBER=PR_NUMBER" >> $GITHUB_ENV
-          echo "PR number from workflow_run event: $PR_NUMBER"
+          PR_NUMBER=$(gh pr view --repo "${PR_TARGET_REPO}" "${PR_BRANCH}" \
+            --json number \
+            --jq '.number')
+          echo "PR_NUMBER=${PR_NUMBER}" >> $GITHUB_ENV
+          echo "PR number from workflow_run event: ${PR_NUMBER}"
 
       - name: Download validation artifact
         uses: actions/download-artifact@v4
