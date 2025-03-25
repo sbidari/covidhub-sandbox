@@ -29,6 +29,9 @@ jobs:
       #     PR_NUMBER=$(jq -r .number <<< "$PR_INFO")
       #     echo "PR_NUMBER=$PR_NUMBER" >> $GITHUB_ENV
 
+      - name: Debug event
+        run: echo "${{ toJSON(github.event) }}"
+  
       - name: Set PR Number
         run: |
           PR_NUMBER=${{ github.event.workflow_run.pull_requests.number }}
